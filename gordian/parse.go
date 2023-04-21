@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"regexp"
 	"unicode/utf8"
 )
 
 type Transform interface {
-	Init(int, string) error
+	Init(*regexp.Regexp)
 	Pipe(io.Reader, io.WriteCloser) error
 }
 
@@ -37,8 +38,18 @@ func Compile(prg string) (Pipeline, error) {
 
 			tr = reflect.New(typ).Interface().(Transform)
 			pipeline = append(pipeline, tr)
-		case lString, lRegexp:
-			tr.Init(lx.lex, lx.tk())
+		case lString:
+			re, err := regexp.Compile(regexp.QuoteMeta(lx.tk()))
+			if err != nil {
+				return nil, fmt.Errorf("at %d: invalid string %s: %w", lx.off, lx.tk(), err)
+			}
+			tr.Init(re)
+		case lRegexp:
+			re, err := regexp.Compile(lx.tk())
+			if err != nil {
+				return nil, fmt.Errorf("at %d: invalid regexp %s: %w", lx.off, lx.tk(), err)
+			}
+			tr.Init(re)
 		case lPipe:
 			tr = nil
 		case lUnknown:
@@ -51,6 +62,9 @@ func Compile(prg string) (Pipeline, error) {
 
 var transforms = map[string]reflect.Type{
 	"groupml": reflect.TypeOf(GroupML{}),
+	"ignore":  reflect.TypeOf(Ignore{}),
+	"only":    reflect.TypeOf(Only{}),
+	"noempty": reflect.TypeOf(NoEmpty{}),
 }
 
 const (
@@ -84,19 +98,15 @@ func (l *lexer) until(r rune) bool {
 
 func (l *lexer) next() bool {
 	l.off += l.len + l.skip
-	if l.off == len(l.src) {
-		return false
-	}
 
 	l.lex = lUnknown
 	l.len = 0
 	l.skip = 0
 
-	for {
+	for l.off < len(l.src) {
 		switch l.src[l.off] {
 		case ' ', '\n', '\r', '\t':
 			l.off++
-
 		case '"':
 			l.off++
 			l.lex = lString
@@ -114,4 +124,5 @@ func (l *lexer) next() bool {
 			return l.until(' ')
 		}
 	}
+	return false
 }

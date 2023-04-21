@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"regexp"
 )
@@ -15,44 +14,32 @@ import (
 //  3. the next line is not an empty line
 //
 // then they all belong to the same record.
-type GroupML struct {
-	re *regexp.Regexp
-	ml bool
-}
+type GroupML struct{ re *regexp.Regexp }
 
-func (grp *GroupML) Init(t int, v string) error {
-	if t == lString {
-		v = regexp.QuoteMeta(v)
-	}
-	re, err := regexp.Compile(v)
-	if err != nil {
-		return fmt.Errorf("invalid multi-line grouping regexp %s: %w", v, err)
-	}
-
-	grp.re = re
-	return nil
-}
+func (grp *GroupML) Init(re *regexp.Regexp) { grp.re = re }
 
 func (grp *GroupML) Pipe(in io.Reader, out io.WriteCloser) error {
+	ml := false
+
 	scn := bufio.NewScanner(in)
 	for scn.Scan() {
-
 		switch {
 		case grp.re.Match(scn.Bytes()):
-			if grp.ml {
+			if ml {
 				// terminate previous match
 				io.WriteString(out, "\n")
 			}
-			grp.ml = true
+			ml = true
 			out.Write(tright(scn.Bytes()))
 
-		case grp.ml:
+		case ml:
 			// normalize spaces to single
 			line := tleft(scn.Bytes())
 			if len(line) == 0 {
 				// rule #3: end capture
 				out.Write(scn.Bytes())
-				grp.ml = false
+				io.WriteString(out, "\n")
+				ml = false
 				continue
 			}
 			io.WriteString(out, " ")
