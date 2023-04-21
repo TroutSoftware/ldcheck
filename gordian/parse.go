@@ -119,6 +119,9 @@ func (l *lexer) next() bool {
 			l.lex = lPipe
 			l.len = 1
 			return true
+		case '#':
+			l.until('\n')
+			l.off += l.len + l.skip
 		default:
 			l.lex = lTransform
 			return l.until(' ')
