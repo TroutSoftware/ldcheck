@@ -6,13 +6,15 @@ import (
 	"io"
 	"log"
 	"os"
+
+	"github.com/TroutSoftware/x-tools/gordian"
 )
 
 func main() {
 	prg := flag.String("H", "", "gordian transforms to apply")
 	flag.Parse()
 
-	pl, err := Compile(*prg)
+	pl, err := gordian.Compile(*prg)
 	if err != nil {
 		log.Fatal(err)
 	}

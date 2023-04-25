@@ -1,4 +1,4 @@
-package main
+package gordian
 
 import (
 	"fmt"
