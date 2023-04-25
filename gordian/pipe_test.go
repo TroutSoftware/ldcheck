@@ -44,7 +44,7 @@ func removeDupWhiteSpaces(in *Reader, out io.WriteCloser) error {
 			i++
 		}
 
-		for whitespace[w[i]] {
+		for i < len(w) && whitespace[w[i]] {
 			i++
 
 			if i == len(w) {
@@ -58,4 +58,22 @@ func removeDupWhiteSpaces(in *Reader, out io.WriteCloser) error {
 	}
 
 	return out.Close()
+}
+
+func TestWrapAround(t *testing.T) {
+	r, w := Pipe()
+	go func() {
+		for i := 0; i < 100; i++ {
+			w.Write([]byte("a"))
+		}
+	}()
+
+	for i := 0; i < 10; i++ {
+		if !r.Next(10) {
+			t.Fatal("small read")
+		}
+
+		t.Logf("reading window %s", r.Window())
+		r.Release(10)
+	}
 }

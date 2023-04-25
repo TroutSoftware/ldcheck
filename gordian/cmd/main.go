@@ -6,13 +6,24 @@ import (
 	"io"
 	"log"
 	"os"
+	"runtime/pprof"
 
 	"github.com/TroutSoftware/x-tools/gordian"
 )
 
 func main() {
 	prg := flag.String("H", "", "gordian transforms to apply")
+	cpuprofile := flag.String("prof", "", "write cpu profile to file")
 	flag.Parse()
+
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 
 	pl, err := gordian.Compile(*prg)
 	if err != nil {

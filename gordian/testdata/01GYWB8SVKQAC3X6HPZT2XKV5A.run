@@ -1,0 +1,13 @@
+-- input --
+=== a line
+ that is split into
+ multiple ones
+
+with some empty ones
+and #spurious entries
+-- pipeline --
+groupml "===" | noempty | ignore "#spurious "
+-- output --
+=== a line that is split into multiple ones
+with some empty ones
+and entries
