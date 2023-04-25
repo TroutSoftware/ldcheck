@@ -1,0 +1,14 @@
+-- input --
+a bit of text
+
+including
+
+empty lines
+-- pipeline --
+noempty
+-- output --
+a bit of text
+
+including
+
+empty lines

@@ -1,4 +1,4 @@
-module github.com/TroutSoftware/x-tools
+module github.com/TroutSoftware/x-tools/ldcheck
 
 go 1.20
 

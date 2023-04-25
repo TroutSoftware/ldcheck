@@ -5,6 +5,7 @@ import (
 	"io"
 	"reflect"
 	"regexp"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -85,17 +86,6 @@ type lexer struct {
 
 func (l *lexer) tk() string { return l.src[l.off : l.off+l.len] }
 
-func (l *lexer) until(r rune) bool {
-	for i, s := range l.src[l.off:] {
-		if s == r {
-			l.skip = utf8.RuneLen(r)
-			l.len = i
-			return true
-		}
-	}
-	return false
-}
-
 func (l *lexer) next() bool {
 	l.off += l.len + l.skip
 
@@ -110,22 +100,34 @@ func (l *lexer) next() bool {
 		case '"':
 			l.off++
 			l.lex = lString
-			return l.until('"')
+			return l.until("\"")
 		case '/':
 			l.off++
 			l.lex = lRegexp
-			return l.until('/')
+			return l.until("/")
 		case '|':
 			l.lex = lPipe
 			l.len = 1
 			return true
 		case '#':
-			l.until('\n')
+			l.until("\n")
 			l.off += l.len + l.skip
 		default:
 			l.lex = lTransform
-			return l.until(' ')
+			l.until(" \n\r\t")
+			return true // next step will check validity
 		}
 	}
 	return false
+}
+
+func (l *lexer) until(chars string) bool {
+	i := strings.IndexAny(l.src[l.off:], chars)
+	if i == -1 {
+		return false
+	}
+
+	_, l.skip = utf8.DecodeRuneInString(l.src[l.off+i:])
+	l.len = i
+	return true
 }
