@@ -67,12 +67,17 @@ func readPassword() (s []byte, err error) {
 	panic("not implemented")
 }
 
+var allowInsecure bool
+var allowVeryInsecure bool
+
 func main() {
 	var (
 		conf = flag.String("file", "ldap.local.toml", "Configuration file to check")
 		name = flag.String("name", "johndoe", "User Name")
 		pass = flag.String("pass", "correcthorsebatterystaple", "Password")
 	)
+	flag.BoolVar(&allowInsecure, "tlsv1", false, "Allow TLSv1 connection")
+	flag.BoolVar(&allowVeryInsecure, "ssl3", false, "Allow SSLv3 connection")
 	flag.Parse()
 
 	var Config struct {
@@ -117,9 +122,17 @@ func DialURL(addr string) (*ldap.Conn, error) {
 		if port == "" {
 			port = ldap.DefaultLdapsPort
 		}
+		minversion := tls.VersionTLS12 // default for clients
+		if allowInsecure {
+			minversion = tls.VersionTLS10
+		}
+		if allowVeryInsecure {
+			minversion = tls.VersionSSL30
+		}
+
 		tlsConf := &tls.Config{
 			ServerName: host,
-			MinVersion: tls.VersionTLS10,
+			MinVersion: uint16(minversion),
 		}
 		return ldap.DialTLS("tcp", net.JoinHostPort(host, port), tlsConf)
 	}
