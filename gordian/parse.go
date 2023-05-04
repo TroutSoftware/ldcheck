@@ -32,7 +32,8 @@ func Compile(prg string) (Pipeline, error) {
 	for lx.next() {
 		switch lx.lex {
 		case lTransform:
-			typ, ok := transforms[lx.tk()]
+			t := lx.tk()
+			typ, ok := transforms[t]
 			if !ok {
 				return nil, fmt.Errorf("unknown transform %s", lx.tk())
 			}
@@ -62,10 +63,11 @@ func Compile(prg string) (Pipeline, error) {
 }
 
 var transforms = map[string]reflect.Type{
-	"groupml": reflect.TypeOf(GroupML{}),
-	"ignore":  reflect.TypeOf(Ignore{}),
-	"only":    reflect.TypeOf(Only{}),
-	"noempty": reflect.TypeOf(NoEmpty{}),
+	"groupml":    reflect.TypeOf(GroupML{}),
+	"ignore":     reflect.TypeOf(Ignore{}),
+	"only":       reflect.TypeOf(Only{}),
+	"noempty":    reflect.TypeOf(NoEmpty{}),
+	"decompress": reflect.TypeOf(Decompress{}),
 }
 
 const (
@@ -124,6 +126,7 @@ func (l *lexer) next() bool {
 func (l *lexer) until(chars string) bool {
 	i := strings.IndexAny(l.src[l.off:], chars)
 	if i == -1 {
+		l.len = len(l.src[l.off:])
 		return false
 	}
 
