@@ -63,11 +63,12 @@ func Compile(prg string) (Pipeline, error) {
 }
 
 var transforms = map[string]reflect.Type{
-	"groupml":    reflect.TypeOf(GroupML{}),
-	"ignore":     reflect.TypeOf(Ignore{}),
-	"only":       reflect.TypeOf(Only{}),
-	"noempty":    reflect.TypeOf(NoEmpty{}),
-	"decompress": reflect.TypeOf(Decompress{}),
+	"groupml": reflect.TypeOf(GroupML{}),
+	"ignore":  reflect.TypeOf(Ignore{}),
+	"only":    reflect.TypeOf(Only{}),
+	"noempty": reflect.TypeOf(NoEmpty{}),
+	"gzip":    reflect.TypeOf(Gzip{}),
+	"bzip2":   reflect.TypeOf(Bzip2{}),
 }
 
 const (
