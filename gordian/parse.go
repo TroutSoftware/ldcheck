@@ -67,8 +67,8 @@ var transforms = map[string]reflect.Type{
 	"ignore":  reflect.TypeOf(Ignore{}),
 	"only":    reflect.TypeOf(Only{}),
 	"noempty": reflect.TypeOf(NoEmpty{}),
-	"gzip":    reflect.TypeOf(Gzip{}),
-	"bzip2":   reflect.TypeOf(Bzip2{}),
+	"gunzip":  reflect.TypeOf(Gzip{}),
+	"bunzip2": reflect.TypeOf(Bzip2{}),
 }
 
 const (
@@ -117,7 +117,10 @@ func (l *lexer) next() bool {
 			l.off += l.len + l.skip
 		default:
 			l.lex = lTransform
-			l.until(" \n\r\t")
+			if !l.until(" \n\r\t") {
+				l.len = len(l.src) - l.off // accept all remaining
+			}
+
 			return true // next step will check validity
 		}
 	}
@@ -127,7 +130,6 @@ func (l *lexer) next() bool {
 func (l *lexer) until(chars string) bool {
 	i := strings.IndexAny(l.src[l.off:], chars)
 	if i == -1 {
-		l.len = len(l.src[l.off:])
 		return false
 	}
 
