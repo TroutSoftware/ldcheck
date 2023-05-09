@@ -16,7 +16,7 @@ func TestGzip(t *testing.T) {
 	t.Run(filepath.Base(file), func(t *testing.T) {
 		createAndCompressGzip(t, file)
 		var pl []Transform
-		pl, err := Compile("gzip")
+		pl, err := Compile("gunzip")
 		if err != nil {
 			t.Fatalf("invalid processing pipeline for file %s: %s", filepath.Base(file), err)
 		}

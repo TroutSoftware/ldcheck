@@ -17,7 +17,7 @@ func TestBzip2(t *testing.T) {
 	t.Run(filepath.Base(file), func(t *testing.T) {
 		createAndCompressBzip2(t, file)
 		var pl []Transform
-		pl, err := Compile("bzip2")
+		pl, err := Compile("bunzip2")
 		if err != nil {
 			t.Fatalf("invalid processing pipeline for file %s: %s", filepath.Base(file), err)
 		}
