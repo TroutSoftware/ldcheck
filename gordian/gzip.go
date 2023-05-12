@@ -41,6 +41,9 @@ func (g *Gzip) Pipe(in io.Reader, out io.WriteCloser) error {
 
 	// Rename the temporary file to the original file
 	err = os.Rename(g.filePath+"_temp", g.filePath)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
