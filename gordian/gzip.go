@@ -1,49 +1,35 @@
 package gordian
 
 import (
+	"bufio"
 	"compress/gzip"
 	"io"
-	"os"
 	"regexp"
 )
 
-type Gzip struct {
-	filePath string
-}
+type Gzip struct{}
 
-func (g *Gzip) Init(r *regexp.Regexp) {
-	g.filePath = r.String()
+func (g *Gzip) Init(r *regexp.Regexp) {}
 
-}
 func (g *Gzip) Pipe(in io.Reader, out io.WriteCloser) error {
-	file, err := os.Open(g.filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	reader, err := gzip.NewReader(file)
+	defer out.Close()
+
+	// Create a gzip reader that reads from the input pipe reader
+	reader, err := gzip.NewReader(in)
 	if err != nil {
 		return err
 	}
 	defer reader.Close()
 
-	// Create an output file
-	outFile, err := os.Create(g.filePath + "_temp")
-	if err != nil {
-		return err
-	}
-	defer outFile.Close()
-
-	_, err = io.Copy(outFile, reader)
-	if err != nil {
-		return err
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		line := scanner.Bytes()
+		out.Write(line)
+		io.WriteString(out, "\n")
 	}
 
-	// Rename the temporary file to the original file
-	err = os.Rename(g.filePath+"_temp", g.filePath)
-	if err != nil {
+	if err := scanner.Err(); err != nil {
 		return err
 	}
-
-	return nil
+	return out.Close()
 }

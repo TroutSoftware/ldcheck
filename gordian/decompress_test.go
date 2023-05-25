@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"testing"
 
@@ -49,33 +48,25 @@ func TestDecompressed(t *testing.T) {
 			}
 
 			for i := 0; i < len(pl); i++ {
-				r, w := io.Pipe()
-				regEx, err := regexp.Compile(f)
+				in, err := os.Open(f)
 				if err != nil {
-					t.Fatalf("error parsing file %s", err)
+					t.Fatalf("invalid processing pipeline: %s", err)
 				}
-				pl[i].Init(regEx)
-				pl[i].Pipe(r, w)
+				defer in.Close()
+
+				r, w := io.Pipe()
+				go pl[i].Pipe(in, w)
+
+				var result strings.Builder
+				io.Copy(&result, r)
 
 				// validate output
-				// read data from file
-				var buf strings.Builder
-				result, err := os.Open(f)
-				if err != nil {
-					t.Fatalf("error opening results %s", err)
-				}
-
-				_, err = io.Copy(&buf, result)
-				if err != nil {
-					t.Fatalf("error reading results %s", err)
-				}
-
 				out := arch.Get("output")[3:]
-				if !cmp.Equal(buf.String(), out) {
-					t.Errorf("invalid output. got: %s want: %s", out, buf.String())
+				if !cmp.Equal(result.String(), out) {
+					t.Errorf("invalid output. got: %s want: %s", out, result.String())
 				}
 
-				// clear decompressed file
+				// clear input file
 				os.Remove(f)
 			}
 		})
