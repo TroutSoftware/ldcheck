@@ -1,41 +1,11 @@
-// Copyright 2018 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-// Package txtar implements a trivial text-based file archive format.
-//
-// The goals for the format are:
-//
-//   - be trivial enough to create and edit by hand.
-//   - be able to store trees of text files describing go command test cases.
-//   - diff nicely in git history and code reviews.
-//
-// Non-goals include being a completely general archive format,
-// storing binary data, storing file modes, storing special files like
-// symbolic links, and so on.
-//
-// # Txtar format
-//
-// A txtar archive is zero or more comment lines and then a sequence of file entries.
-// Each file entry begins with a file marker line of the form "-- FILENAME --"
-// and is followed by zero or more file content lines making up the file data.
-// The comment or file content ends at the next file marker line.
-// The file marker line must begin with the three-byte sequence "-- "
-// and end with the three-byte sequence " --", but the enclosed
-// file name can be surrounding by additional white space,
-// all of which is stripped.
-//
-// If the txtar file is missing a trailing newline on the final line,
-// parsers should consider a final newline to be present anyway.
-//
-// There are no possible syntax errors in a txtar archive.
+// Evolution of golang.org/x/tools/txtar, handling encoding for binary data
 package txtar
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"os"
-	"path"
 	"strings"
 )
 
@@ -78,36 +48,32 @@ func ParseFile(file string) (*Archive, error) {
 // The returned Archive holds slices of data.
 func Parse(data []byte) *Archive {
 	a := new(Archive)
-	var name string
+	var name, enc string
 	a.Comment, name, data = findFileMarker(data)
 	for name != "" {
+		name, enc = findEncodingMarker(name)
 		f := File{name, nil}
 		f.Data, name, data = findFileMarker(data)
+		switch enc {
+		case "base64":
+			buf := make([]byte, base64.StdEncoding.DecodedLen(len(f.Data)))
+			sz, err := base64.StdEncoding.Decode(buf, f.Data)
+			if err != nil {
+				panic(err)
+			}
+			f.Data = buf[:sz]
+		}
 		a.Files = append(a.Files, f)
 	}
 	return a
 }
 
-// Glob returns all files in the archive matching pattern
-func (a *Archive) Glob(pattern string) []File {
-	files := make([]File, len(a.Files))
-	j := 0
-	for _, f := range a.Files {
-		if match, _ := path.Match(pattern, f.Name); match {
-			files[j] = f
-			j++
-		}
-	}
-
-	return files[:j]
-}
-
 // Get return file at name
 // This panics if the file does not exist, and should only be used in tests
-func (a *Archive) Get(name string) string {
+func (a *Archive) Get(name string) []byte {
 	for _, f := range a.Files {
 		if f.Name == name {
-			return string(f.Data)
+			return f.Data
 		}
 	}
 	panic("file " + name + " not in archive")
@@ -135,6 +101,16 @@ func findFileMarker(data []byte) (before []byte, name string, after []byte) {
 		}
 		i += j + 1 // positioned at start of new possible marker
 	}
+}
+
+func findEncodingMarker(name string) (string, string) {
+	const encodingMarker = "; "
+	j := strings.Index(name, encodingMarker)
+	if j < 0 {
+		return name, ""
+	}
+
+	return name[:j], name[j+len(encodingMarker):]
 }
 
 // isMarker checks whether data begins with a file marker line.
