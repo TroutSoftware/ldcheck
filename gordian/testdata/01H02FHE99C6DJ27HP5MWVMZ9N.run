@@ -1,0 +1,15 @@
+-- input; base64 --
+H4sICJrxXWQAA3RleHQudHh0X3RlbXAAzdJNa8JAEAbge3/FsCeFut+7mngqRRSsrWDAQ+lho2sS
+zLpBI7X99d1WWlTSexiYw8Aw88DLKP4uBr1Qr3RAZuaDcMpFzHgsZKw09Kii9A3QeJQAKXZre8J5
+7UqYJMmcMMwQcEqBcSEB9RCgmf8sytIQhSl0lmHBvx/gOQEWDg0hDLQcwknLLjxUVWmXNp0WNVGi
+j4WGznSSzJ7uoSy2FsZ2tfVdeMz33lmiBuFRQXmEGaOwMBuzL37XRuvMEqYx0zyK0B07q3izSsWU
+X6tM6o91kyoa9NuGEs0oHfofav6yCKrDMXVFjau8ulCFW0ABkY3fux9xq3DyPxwXNzl0JrMHUvrM
+42qXXQHlNzCv6yomxJ6MCy/jlXcX2W2VWTWb+zFl1+Y0aG9DKs/alkT0CzTIYtJOBAAA
+-- pipeline --
+gunzip
+-- output --
+10.0.0.1 - - [08/May/2023:12:34:56 -0500] "GET /index.html HTTP/1.1" 200 1234 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299"
+10.0.0.2 - - [08/May/2023:12:35:02 -0500] "GET /about.html HTTP/1.1" 200 987 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299"
+10.0.0.3 - - [08/May/2023:12:36:12 -0500] "POST /submit.php HTTP/1.1" 302 0 "/form.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299"
+10.0.0.4 - - [08/May/2023:12:36:23 -0500] "GET /images/logo.png HTTP/1.1" 304 0 "http://example.com/index.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299"
+10.0.0.5 - - [08/May/2023:12:37:01 -0500] "GET /blog.html HTTP/1.1" 404 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299"

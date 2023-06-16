@@ -44,7 +44,7 @@ func TestRuns(t *testing.T) {
 
 			for i, f := range x.Files {
 				if f.Name == "output" {
-					x.Files[i].Data = []byte(buf.String())
+					x.Files[i].Data = buf.Bytes()
 				}
 			}
 

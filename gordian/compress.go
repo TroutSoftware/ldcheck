@@ -10,7 +10,7 @@ import (
 
 type Bzip2 struct{}
 
-func (g *Bzip2) Init(r *regexp.Regexp) {}
+func (g *Bzip2) Init(_ *regexp.Regexp) {}
 
 func (g *Bzip2) Pipe(in io.Reader, out io.WriteCloser) error {
 	in = bzip2.NewReader(in)
@@ -20,7 +20,7 @@ func (g *Bzip2) Pipe(in io.Reader, out io.WriteCloser) error {
 
 type Gzip struct{}
 
-func (g *Gzip) Init() {}
+func (g *Gzip) Init(_ *regexp.Regexp) {}
 
 func (g *Gzip) Pipe(in io.Reader, out io.WriteCloser) error {
 	defer out.Close()
