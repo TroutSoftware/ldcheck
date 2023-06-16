@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: gomod
+    directory: /gordian
+    schedule:
+      interval: daily
+
+  - package-ecosystem: gomod
+    directory: /ldcheck
+    schedule:
+      interval: daily
