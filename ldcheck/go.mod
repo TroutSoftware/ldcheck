@@ -3,7 +3,7 @@ module github.com/TroutSoftware/x-tools/ldcheck
 go 1.20
 
 require (
-	github.com/BurntSushi/toml v1.2.1
+	github.com/BurntSushi/toml v1.3.2
 	github.com/go-ldap/ldap/v3 v3.4.4
 	golang.org/x/term v0.7.0
 )
