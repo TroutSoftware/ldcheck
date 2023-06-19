@@ -1,0 +1,14 @@
+-- input --
+first line
+second line @my-signal
+third line 
+fourth line @my-level
+fifth line 
+-- pipeline --
+dragend /@my-.*/
+-- output --
+first line
+second line @my-signal
+third line @my-signal
+fourth line @my-level
+fifth line @my-level
