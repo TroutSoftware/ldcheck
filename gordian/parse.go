@@ -72,6 +72,7 @@ var transforms = map[string]reflect.Type{
 	"ignore":   reflect.TypeOf(Ignore{}),
 	"noempty":  reflect.TypeOf(NoEmpty{}),
 	"only":     reflect.TypeOf(Only{}),
+	"unixyear": reflect.TypeOf(UnixYear{}),
 }
 
 const (
