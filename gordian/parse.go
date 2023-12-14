@@ -66,6 +66,8 @@ var transforms = map[string]reflect.Type{
 	"bunzip2":  reflect.TypeOf(Bzip2{}),
 	"bunzip2?": reflect.TypeOf(MaybeBzip2{}),
 	"dragend":  reflect.TypeOf(DragEnd{}),
+	"dragstart": reflect.TypeOf(DragStart{}),
+	"exclude": reflect.TypeOf(Exclude{}),
 	"groupml":  reflect.TypeOf(GroupML{}),
 	"gunzip":   reflect.TypeOf(Gzip{}),
 	"gunzip?":  reflect.TypeOf(MaybeGzip{}),

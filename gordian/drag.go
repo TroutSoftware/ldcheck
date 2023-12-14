@@ -33,3 +33,31 @@ func (d *DragEnd) Pipe(in io.Reader, out io.WriteCloser) error {
 
 	return out.Close()
 }
+
+type DragStart struct{ re *regexp.Regexp }
+
+func (d *DragStart) Init(re *regexp.Regexp) { d.re = re }
+
+func (d *DragStart) Pipe(in io.Reader, out io.WriteCloser) error {
+	scn := bufio.NewScanner(in)
+	var match string
+
+	for scn.Scan() {
+		line := scn.Bytes()
+		m := d.re.FindIndex(line)
+		if m != nil {
+			match = string(line[m[0]:m[1]])
+			out.Write(line)
+		} else {
+			io.WriteString(out, match)
+			out.Write(line)
+		}
+		io.WriteString(out, "\n")
+	}
+
+	if err := scn.Err(); err != nil {
+		return err
+	}
+
+	return out.Close()
+}

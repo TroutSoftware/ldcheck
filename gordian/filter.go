@@ -8,9 +8,11 @@ import (
 
 type Ignore struct{ re *regexp.Regexp }
 type Only struct{ re *regexp.Regexp }
+type Exclude struct { re *regexp.Regexp }
 
 func (i *Ignore) Init(re *regexp.Regexp) { i.re = re }
 func (o *Only) Init(re *regexp.Regexp)   { o.re = re }
+func (x *Exclude) Init(re *regexp.Regexp) { x.re = re }
 
 func (i *Ignore) Pipe(in io.Reader, out io.WriteCloser) error {
 	scn := bufio.NewScanner(in)
@@ -43,6 +45,25 @@ func (o *Only) Pipe(in io.Reader, out io.WriteCloser) error {
 		} else {
 			out.Write(line[:m[0]])
 			out.Write(line[m[1]:])
+		}
+		io.WriteString(out, "\n")
+	}
+
+	if err := scn.Err(); err != nil {
+		return err
+	}
+
+	return out.Close()
+}
+
+func (x *Exclude) Pipe(in io.Reader, out io.WriteCloser) error {
+	scn := bufio.NewScanner(in)
+	for scn.Scan() {
+		line := scn.Bytes()
+		if x.re.Match(line) {
+			continue
+		} else {
+			out.Write(line)
 		}
 		io.WriteString(out, "\n")
 	}
